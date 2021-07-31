@@ -21,6 +21,8 @@ using HtmlAgilityPack;
 using System.Net;
 using System.Text.RegularExpressions;
 using System;
+using System.Reflection;
+using static System.Net.WebRequestMethods;
 
 namespace IbContractExtractor
 {
@@ -103,6 +105,8 @@ namespace IbContractExtractor
         private static IEnumerable<HtmlNode> GetLinks(Exchange exchange, int index)
         {
             url = GetUrl(exchange, index);
+            Logger.Instance.WriteInfo("URL... {0}", url);
+
             doc = Util.HtmlWebInstance.Load(url);
 
             // here's the magic. After examining the IB pages, the "juicy bit" is stored
@@ -124,10 +128,15 @@ namespace IbContractExtractor
                 string mainUrl = "http://www.interactivebrokers.com/en/trading/etfs.php?exch={0}&ib_entity=llc#show";
                 return string.Format(mainUrl, exchange.Code.ToLower());
             }
-            else
-            {
-                string mainUrl = "http://www.interactivebrokers.com/en/trading/exchanges.php?exch={0}&showcategories={1}&showproducts=&sequence_idx={2}&sortproducts=&ib_entity=llc#show";
-                return string.Format(mainUrl, exchange.Code.ToLower(), exchange.Category.ToUpper(), sequence);
+else
+{
+                string mainUrl = "https://www.interactivebrokers.com/en/trading/exchanges.php?f=&exch={0}&showcategories={1}&p=&cc=&limit=100&page={2}";
+                
+                /*Original URL: 
+                 * string mainUrl = "http://www.interactivebrokers.com/en/trading/exchanges.php?exch={0}&showcategories={1}&showproducts=&sequence_idx={2}&sortproducts=&ib_entity=llc#show";
+                 */
+
+                return string.Format(mainUrl, exchange.Code.ToLower(), exchange.Category.ToUpper(), (int)(sequence/100));
             }
         }
 
